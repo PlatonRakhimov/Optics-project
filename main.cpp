@@ -1,11 +1,12 @@
 #include <cmath>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 // Функция для создания прямоугольной щели
-std::vector<std::vector<float>> create_slit(int width, int start_index, int end_index) 
+std::vector<std::vector<double>> create_slit(size_t width, size_t start_index, size_t end_index) 
 {
-    std::vector<std::vector<float>> slit(width, std::vector<float>(width, 0));
+    std::vector<std::vector<double>> slit(width, std::vector<double>(width, 0));
 
     for (int i = 0; i < width; i++) 
     {
@@ -19,31 +20,33 @@ std::vector<std::vector<float>> create_slit(int width, int start_index, int end_
 }
 
 // Основная функция для расчета дифракции
-std::vector<std::vector<float>> calculate_diffraction_pattern(const std::vector<std::vector<float>>& slit, float z, float lambda, float scale) 
+std::vector<std::vector<double>> calculate_diffraction_pattern(const std::vector<std::vector<double>>& slit, double z, double lambda, double scale) 
 {
     static float PI = 3.1415;
-    std::vector<std::vector<float>> screen(slit.size(), std::vector<float>(slit[0].size(), 0));
-    float k = 2 * PI / lambda;
+    std::vector<std::vector<double>> screen(slit.size(), std::vector<double>(slit[0].size(), 0));
+    double k = 2 * PI / lambda;
 
     for (size_t screen_x = 0; screen_x < screen.size(); screen_x++) 
     {
+        std::cout << "screen_x = " << screen_x << "\n";
+
         for (size_t screen_y = 0; screen_y < screen[0].size(); screen_y++) 
         {
-            float Re = 0;
-            float Im = 0;
+            double Re = 0;
+            double Im = 0;
 
             for (size_t tr_x = 0; tr_x < slit.size(); tr_x++) 
             {
                 for (size_t tr_y = 0; tr_y < slit[0].size(); tr_y++) 
                 {
-                    float dx = (screen_x - tr_x) / scale;
-                    float dy = (screen_y - tr_y) / scale;
+                    double dx = (screen_x - tr_x) / scale;
+                    double dy = (screen_y - tr_y) / scale;
 
-                    float ro = sqrt(pow(dx, 2) + pow(dy, 2));
-                    float R = sqrt(pow(ro, 2) + pow(z, 2));
-                    float alpha = atan(ro / z);
+                    double ro = sqrt(pow(dx, 2) + pow(dy, 2));
+                    double R = sqrt(pow(ro, 2) + pow(z, 2));
+                    double alpha = atan(ro / z);
 
-                    float koef = slit[tr_x][tr_y] * cos(alpha) / (lambda*R);
+                    double koef = slit[tr_x][tr_y] * cos(alpha) / (lambda*R);
 
                     Im += (-1) * koef * cos(k*R);
                     Re += koef * sin(k*R);
@@ -58,7 +61,7 @@ std::vector<std::vector<float>> calculate_diffraction_pattern(const std::vector<
 }
 
 // функция для занесенния полученных данных в файл
-void write_to_file(const std::vector<std::vector<float>>& array, const std::string& filename) 
+void write_to_file(const std::vector<std::vector<double>>& array, const std::string& filename) 
 {
     std::ofstream file(filename);
 
@@ -66,7 +69,7 @@ void write_to_file(const std::vector<std::vector<float>>& array, const std::stri
     {
         for (const auto& row: array) 
         {
-            for (float value: row) 
+            for (double value: row) 
             {
                 file << value << " ";
             }
@@ -79,17 +82,16 @@ void write_to_file(const std::vector<std::vector<float>>& array, const std::stri
 
 int main() 
 {
-    int width = 100;
-    int start_index = 49;
-    int end_index = 51;
+    size_t width = 100;
+    size_t start_index = 495;
+    size_t end_index = 505;
+    std::vector<std::vector<double>> slit = create_slit(width, start_index, end_index);
 
-    std::vector<std::vector<float>> slit = create_slit(width, start_index, end_index);
+    double z = 0.05 * 10;
+    double lambda = 500 * pow(10, -9);
+    double scale = 20000;
 
-    float z = 0.05 * 10;
-    float lambda = 500 * pow(10, -9);
-    float scale = 20000;
-
-    std::vector<std::vector<float>> screen = calculate_diffraction_pattern(slit, z, lambda, scale);
+    std::vector<std::vector<double>> screen = calculate_diffraction_pattern(slit, z, lambda, scale);
 
     write_to_file(screen, "screen.txt");
 }
