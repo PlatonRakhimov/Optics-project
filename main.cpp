@@ -2,34 +2,6 @@
 #include <fstream>
 #include <vector>
 
-// Функция для нормализации значений в массиве
-std::vector<std::vector<float>> normalize(const std::vector<std::vector<float>>& array) 
-{
-    float max = 0;
-    for (const auto& row: array) 
-    {
-        for (float value: row) 
-        {
-            if (value > max) 
-            {
-                max = value;
-            }
-        }
-    }
-    
-    std::vector<std::vector<float>> normalized_array(array.size(), std::vector<float>(array[0].size(), 0));
-
-    for (size_t i = 0; i < array.size(); i++) 
-    {
-        for (size_t j = 0; j < array[i].size(); j++) 
-        {
-            normalized_array[i][j] = array[i][j]/max;
-        }
-    }
-
-    return normalized_array;
-}
-
 // Функция для создания прямоугольной щели
 std::vector<std::vector<float>> create_slit(int width, int start_index, int end_index) 
 {
@@ -120,5 +92,4 @@ int main()
     std::vector<std::vector<float>> screen = calculate_diffraction_pattern(slit, z, lambda, scale);
 
     write_to_file(screen, "screen.txt");
-
 }
